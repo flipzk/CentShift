@@ -17,3 +17,4 @@ class Transaction(SQLModel, table=True):
     date: date
     category: Optional[str] = None
     description: Optional[str] = None
+
