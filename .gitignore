@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes Virtuais
+.venv/
+venv/
+env/
+
+# Base de Dados (não queremos enviar os teus dados financeiros para o Git!)
+*.db
+*.sqlite3
+centshift.db
+
+# Ficheiros de Ambiente / Segredos
+.env
+
+# IDEs e Editores
+.vscode/
+.idea/
+
+backend/__pycache__/schemas.cpython-313.pyc
+backend/__pycache__/models.cpython-313.pyc
+backend/__pycache__/main.cpython-313.pyc
+/backend/__pycache__

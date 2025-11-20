@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends
 from sqlmodel import Session
-import models
-import schemas
-import crud
-import db
+from . import models
+from . import schemas
+from . import crud
+from . import db
 
 app = FastAPI(title="CentShift API") 
 
