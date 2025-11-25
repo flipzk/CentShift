@@ -6,7 +6,7 @@ This project demonstrates a scalable software architecture using FastAPI, Stream
 
 ## Demo
 
-<video src="demo.mp4" width="100%" controls preload></video>
+<video src="https://github.com/flipzk/CentShift/raw/main/demo.mp4" width="100%" controls preload="none"></video>
 
 ## Key Features
 
