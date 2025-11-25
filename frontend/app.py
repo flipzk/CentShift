@@ -11,10 +11,8 @@ API_URL = "http://127.0.0.1:8000"
 st.title("CentShift")
 st.markdown("### Personal Finance Tracker")
 
-
-# SIDEBAR: BUDGET CONFIGURATION
 with st.sidebar:
-    st.header("Configuration ⚙️")
+    st.header("Configuration")
     
     salary = st.number_input("Monthly Income (€)", min_value=0.0, value=1000.0, step=50.0)
     
@@ -28,15 +26,16 @@ with st.sidebar:
             resp = requests.get(f"{API_URL}/budget/calculate", params={"amount": salary, "strategy": strategy})
             if resp.status_code == 200:
                 st.session_state['budget_plan'] = resp.json()
-                st.toast("Plan updated successfully!", icon="✅")
+                st.success("Plan updated successfully")
             else:
-                st.error("Error calculating budget.")
+                st.error("Error calculating budget")
         except:
-            st.error("Backend is offline. Make sure uvicorn is running.")
+            st.error("Backend is offline")
 
     st.markdown("---")
     st.caption("CentShift v1.0")
 
+# Default plan initialization
 if 'budget_plan' not in st.session_state:
     try:
         resp = requests.get(f"{API_URL}/budget/calculate", params={"amount": 1000, "strategy": "50/30/20"})
@@ -47,22 +46,22 @@ if 'budget_plan' not in st.session_state:
     except:
         st.session_state['budget_plan'] = {}
 
-# NAVIGATION MENU 
+# NAvigation Menu
 selected = option_menu(
     menu_title=None, 
     options=["Dashboard", "AI Scan", "Add Transaction", "History"], 
-    icons=["speedometer2", "camera-fill", "plus-circle-fill", "clock-history"], 
-    menu_icon="cast", 
+    icons=["bar-chart", "camera", "plus", "clock"],  
     default_index=0, 
     orientation="horizontal",
     styles={
         "container": {"padding": "0!important", "background-color": "transparent"},
-        "icon": {"color": "orange", "font-size": "20px"}, 
-        "nav-link": {"font-size": "18px", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
+        "icon": {"color": "orange", "font-size": "16px"}, 
+        "nav-link": {"font-size": "15px", "text-align": "center", "margin":"0px", "--hover-color": "#eee"},
         "nav-link-selected": {"background-color": "#FF4B4B"},
     }
 )
 
+# DASHBOARD 
 if selected == "Dashboard":
     st.subheader("Overview")
     
@@ -76,7 +75,6 @@ if selected == "Dashboard":
         st.info("No data available. Start by scanning a receipt or adding a transaction.")
     else:
         df = pd.DataFrame(transactions)
-        # Filter only money outflows for the charts
         df_expenses = df[df['type'].isin(['expense', 'investment', 'saving'])]
         
         if not df_expenses.empty:
@@ -109,19 +107,18 @@ if selected == "Dashboard":
         else:
             st.warning("Please configure your plan in the sidebar.")
 
-# AI SCANNER  
+# --- AI SCANNER ---
 if selected == "AI Scan":
-    st.subheader("🧾 AI Receipt Scanner")
-    st.markdown("Upload a receipt image and let Google Gemini extract the details.")
+    st.subheader("Receipt Scanner")
+    st.markdown("Upload a receipt image for automatic data extraction.")
 
     uploaded_file = st.file_uploader("Choose a receipt image...", type=["jpg", "png", "jpeg", "heic"])
 
     if uploaded_file is not None:
-        # Show the uploaded image
         st.image(uploaded_file, caption="Uploaded Receipt", width=300)
         
-        if st.button("Analyze Receipt 🧠", type="primary"):
-            with st.spinner("Processing with Google Gemini AI..."):
+        if st.button("Analyze Receipt", type="primary"):
+            with st.spinner("Processing..."):
                 try:
                     files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
                     response = requests.post(f"{API_URL}/transactions/scan", files=files)
@@ -129,13 +126,13 @@ if selected == "AI Scan":
                     if response.status_code == 200:
                         data = response.json()
                         st.session_state['scanned_data'] = data
-                        st.success("Receipt analyzed successfully!")
+                        st.success("Analysis complete")
                     else:
-                        st.error(f"AI Error: {response.text}")
+                        st.error(f"Analysis Failed: {response.text}")
                 except Exception as e:
                     st.error(f"Connection error: {e}")
 
-    # If we already have AI data, show the pre-filled form
+    # Form to review AI data
     if 'scanned_data' in st.session_state:
         st.divider()
         st.subheader("Review & Save")
@@ -146,7 +143,6 @@ if selected == "AI Scan":
             col1, col2 = st.columns(2)
             
             with col1:
-                # Date input with fallback to today's date
                 try:
                     default_date = date.fromisoformat(ai_data.get("date", str(date.today())))
                 except:
@@ -159,7 +155,6 @@ if selected == "AI Scan":
             with col2:
                 new_amount = st.number_input("Amount (€)", value=float(ai_data.get("total", 0.0)), step=0.5)
                 
-                #category setupd
                 if st.session_state.get('budget_plan'):
                     cats = list(st.session_state['budget_plan'].keys()) + ["Salary/Income", "Other"]
                 else:
@@ -171,7 +166,7 @@ if selected == "AI Scan":
                 new_category = st.selectbox("Category", cats, index=cat_index)
                 new_currency = st.selectbox("Currency", ["EUR", "USD", "BRL"], index=0)
 
-            submitted = st.form_submit_button("Confirm & Save Transaction")
+            submitted = st.form_submit_button("Confirm & Save")
             
             if submitted:
                 payload = {
@@ -186,16 +181,15 @@ if selected == "AI Scan":
                 try:
                     resp = requests.post(f"{API_URL}/transactions/", json=payload)
                     if resp.status_code == 200:
-                        st.success("Transaction saved to database! ✅")
+                        st.success("Transaction saved")
                         del st.session_state['scanned_data']
                     else:
                         st.error(f"Error saving: {resp.text}")
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-# --- ADD TRANSACTION (MANUAL) ---
 if selected == "Add Transaction":
-    st.subheader("New Entry (Manual)")
+    st.subheader("Manual Entry")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -224,11 +218,11 @@ if selected == "Add Transaction":
         try:
             response = requests.post(f"{API_URL}/transactions/", json=data)
             if response.status_code == 200:
-                st.success("Transaction saved successfully!")
+                st.success("Transaction saved")
             else:
                 st.error(f"Error: {response.text}")
         except:
-            st.error("Backend connection failed.")
+            st.error("Backend connection failed")
 
 # --- HISTORY ---
 if selected == "History":
