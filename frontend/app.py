@@ -3,10 +3,11 @@ import requests
 import pandas as pd
 from streamlit_option_menu import option_menu 
 from datetime import date
+import os  
 
-# Page Configuration
 st.set_page_config(page_title="CentShift", page_icon="💳", layout="wide", initial_sidebar_state="expanded")
-API_URL = "http://127.0.0.1:8000"
+
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
 
 st.title("CentShift")
 st.markdown("### Personal Finance Tracker")
@@ -107,7 +108,7 @@ if selected == "Dashboard":
         else:
             st.warning("Please configure your plan in the sidebar.")
 
-# --- AI SCANNER ---
+# AI SCANNER 
 if selected == "AI Scan":
     st.subheader("Receipt Scanner")
     st.markdown("Upload a receipt image for automatic data extraction.")
@@ -224,7 +225,7 @@ if selected == "Add Transaction":
         except:
             st.error("Backend connection failed")
 
-# --- HISTORY ---
+# HISTORY 
 if selected == "History":
     st.subheader("Records")
     try:

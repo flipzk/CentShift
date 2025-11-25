@@ -5,9 +5,10 @@ streamlit
 requests
 pandas
 matplotlib
+streamlit-option-menu
 google-generativeai
-python-multipart 
+python-multipart
 python-dotenv
+pillow
 
 # to install the dependencies, run: pip install -r requirements.txt
-# to run the FastAPI app, use: uvicorn main:app --reload

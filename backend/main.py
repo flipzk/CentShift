@@ -1,12 +1,15 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, UploadFile, File, HTTPException
 from sqlmodel import Session
-from . import models, schemas, crud, db, budget, ai_service  
+from . import models, schemas, crud, db, budget, ai_service
 
-app = FastAPI(title="CentShift API") 
-
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     db.create_db_and_tables()
+    yield
+
+app = FastAPI(title="CentShift API", lifespan=lifespan)
+
 
 @app.post("/transactions/", response_model=schemas.TransactionRead)
 def create_transaction(tx: schemas.TransactionCreate, session: Session = Depends(db.get_session)):

@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from . import models  # Importação relativa essencial
+from . import models 
 
 def create_transaction(session: Session, transaction: models.Transaction):
     session.add(transaction)
