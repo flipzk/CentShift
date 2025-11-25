@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from PIL import Image
 import io
 
-# 1. Load environment variables
 load_dotenv()
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
@@ -24,9 +23,7 @@ def analyze_receipt(image_bytes):
         return {"error": "API Key missing"}
 
     try:
-        # Use Gemini 1.5 Flash (Fast & Cost-effective)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
+        model = genai.GenerativeModel('gemini-2.0-flash')        
         image = Image.open(io.BytesIO(image_bytes))
 
         # The Prompt: Strict instructions for the AI
@@ -44,7 +41,6 @@ def analyze_receipt(image_bytes):
 
         response = model.generate_content([prompt, image])
         
-        # Clean the response text to ensure valid JSON
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         
         return json.loads(clean_text)

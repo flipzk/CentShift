@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, UploadFile, File, HTTPException
 from sqlmodel import Session
-from . import models, schemas, crud, db, budget  # Importações relativas
+from . import models, schemas, crud, db, budget, ai_service  
 
 app = FastAPI(title="CentShift API") 
 
-# Cria a base de dados quando a app arranca
 @app.on_event("startup")
 def on_startup():
     db.create_db_and_tables()
@@ -20,5 +19,31 @@ def get_transactions(skip: int = 0, limit: int = 100, session: Session = Depends
 
 @app.get("/budget/calculate")
 def get_budget_allocation(amount: float, strategy: str):
-    # Chama a lógica pura que criámos no budget.py
     return budget.calculate_allocation(amount, strategy)
+
+@app.post("/transactions/scan")
+async def scan_receipt(file: UploadFile = File(...)):
+    """
+    Receives an image file, processes it with Google Gemini AI, 
+    and returns structured JSON data (Total, Date, Category, Description).
+    """
+    # 1. Validate File Type
+    if file.content_type not in ["image/jpeg", "image/png", "image/heic", "image/jpg"]:
+        raise HTTPException(status_code=400, detail="Invalid file type. Only JPG/PNG allowed.")
+
+    # 2. Read file content
+    try:
+        content = await file.read()
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read file.")
+
+    # 3. Call AI Service
+    result = ai_service.analyze_receipt(content)
+
+    if not result:
+         raise HTTPException(status_code=500, detail="AI Analysis failed.")
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+
+    return result
