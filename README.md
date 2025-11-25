@@ -8,6 +8,10 @@ This project demonstrates a scalable software architecture using FastAPI, Stream
 
 <video src="https://github.com/flipzk/CentShift/raw/main/demo.mp4" width="100%" controls preload="none"></video>
 
+
+https://github.com/user-attachments/assets/ce039c31-ffe1-41f4-89aa-8b7150f657b1
+
+
 ## Key Features
 
 * **AI Receipt Scanning:** Automated extraction of total amount, date, category, and description from receipt images using LLMs (Google Gemini).
